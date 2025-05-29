@@ -1,5 +1,6 @@
 package com.algaworks.algasensors.device.management.api.controller;
 
+import com.algaworks.algasensors.device.management.api.client.SensorMonitoringClient;
 import com.algaworks.algasensors.device.management.api.model.SensorInput;
 import com.algaworks.algasensors.device.management.api.model.SensorOutput;
 import com.algaworks.algasensors.device.management.common.IdGenerator;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SensorController {
 
     private final SensorRepository sensorRepository;
+    private final SensorMonitoringClient sensorMonitoringClient;
 
     @GetMapping
     public Page<SensorOutput> search (@PageableDefault Pageable pageable) {
@@ -77,6 +79,8 @@ public class SensorController {
 
         sensorRepository.saveAndFlush(sensor);
 
+        sensorMonitoringClient.enableMonitoring(sensorId);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -89,6 +93,8 @@ public class SensorController {
 
         sensorRepository.saveAndFlush(sensor);
 
+        sensorMonitoringClient.disableMonitoring(sensorId);
+
         return ResponseEntity.noContent().build();
     }
 
@@ -98,6 +104,8 @@ public class SensorController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         sensorRepository.delete(sensor);
+
+        sensorMonitoringClient.disableMonitoring(sensorId);
 
         return ResponseEntity.noContent().build();
     }
